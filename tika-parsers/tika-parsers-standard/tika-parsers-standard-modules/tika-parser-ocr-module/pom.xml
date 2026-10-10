@@ -65,8 +65,61 @@
           </execution>
         </executions>
       </plugin>
+
+      <!-- Tache 2 : analyse de mutation -->
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.18.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.3</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <targetClasses>
+            <param>org.apache.tika.parser.ocr.TesseractOCRConfig*</param>
+          </targetClasses>
+          <timestampedReports>false</timestampedReports>
+          <outputFormats>
+            <param>HTML</param>
+            <param>XML</param>
+          </outputFormats>
+        </configuration>
+      </plugin>
+
+      <!-- Tache 2 : generation de tests par IA (modele local via Ollama) -->
+      <plugin>
+        <groupId>io.github.zju-aces-ise</groupId>
+        <artifactId>chatunitest-maven-plugin</artifactId>
+        <version>2.1.1</version>
+        <configuration>
+          <!-- modele local : la cle peut etre n'importe quelle chaine -->
+          <apiKeys>ollama</apiKeys>
+          <model>code-llama</model>
+          <url>http://localhost:11434/v1/chat/completions</url>
+          <testNumber>3</testNumber>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- Active seulement pendant la generation : mvn -Pchatunitest chatunitest:class ... -->
+    <profile>
+      <id>chatunitest</id>
+      <dependencies>
+        <dependency>
+          <groupId>io.github.zju-aces-ise</groupId>
+          <artifactId>chatunitest-starter</artifactId>
+          <version>1.4.0</version>
+          <type>pom</type>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
   <scm>
     <tag>3.0.0-rc1</tag>
