@@ -317,7 +317,7 @@ Le workflow [`.github/workflows/tache2.yml`](.github/workflows/tache2.yml) const
 exécute tous ses tests (originaux, générés et manuels) avec Java 17. Il n'a pas besoin d'Ollama :
 les tests générés sont versionnés dans le dépôt.
 
-Exécution réussie : **TODO lien**.
+Exécution réussie : https://github.com/KingBrick12/tika/actions/runs/38165370597.
 
 ## 7. Reproduire les résultats
 
