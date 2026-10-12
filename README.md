@@ -1,5 +1,6 @@
 # IFT3913 – Tâche 2 : tests générés par IA et analyse de mutation
 
+
 **Auteur :** Brice Bakoup Wafo ([KingBrick12](https://github.com/KingBrick12)), travail individuel
 
 **Cas d'étude :** Apache Tika, module `tika-parser-ocr-module`
@@ -338,3 +339,10 @@ mvn test-compile org.pitest:pitest-maven:mutationCoverage "-DtargetTests=org.apa
 ```
 
 Les rapports HTML sont écrits dans `target/pit-*/index.html`.
+
+<img src="docs/label-ia/realise-ia-clair.png" alt="Réalisé avec l'IA" width="240">
+
+Ce README a été rédigé avec l'aide de Claude (Anthropic), à partir de mes propres résultats :
+journaux de ChatUniTest, rapports pitest et tests exécutés sur ma machine. J'ai relu et vérifié 
+chaque chiffre et chaque affirmation.
+
