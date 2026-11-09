@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -627,6 +630,18 @@ public class TesseractOCRConfig implements Serializable {
             throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new ObjectInputStream(in);
         return (TesseractOCRConfig) ois.readObject();
+    }
+
+    /**
+     * Tache 3 - V5 (CWE-94) : permet d'ecrire le pourcentage de redimensionnement sous
+     * forme d'expression (ex. "100 * 2"). L'expression est executee telle quelle par un
+     * moteur de script : un utilisateur peut y mettre du code arbitraire.
+     */
+    public void setResizeExpression(String expression) throws ScriptException {
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("javascript");
+        Object result = engine.eval(expression);
+        setResize(((Number) result).intValue());
     }
 
     public enum OUTPUT_TYPE {
