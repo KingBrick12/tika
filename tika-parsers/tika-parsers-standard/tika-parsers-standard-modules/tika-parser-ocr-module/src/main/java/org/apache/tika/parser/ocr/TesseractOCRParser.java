@@ -37,6 +37,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -633,6 +637,17 @@ public class TesseractOCRParser extends AbstractExternalProcessParser implements
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         return db.parse(hocr);
+    }
+
+    /**
+     * Tache 3 - V3 (CWE-89) : recherche d'un texte OCR deja calcule dans une base, par
+     * nom de fichier. Le nom (controle par l'utilisateur) est concatene dans la requete :
+     * un nom comme  x' OR '1'='1  retourne tout le cache.
+     */
+    static ResultSet findCachedOcr(Connection connection, String fileName) throws SQLException {
+        Statement statement = connection.createStatement();
+        String query = "SELECT text FROM ocr_cache WHERE file_name = '" + fileName + "'";
+        return statement.executeQuery(query);
     }
 
     /**
