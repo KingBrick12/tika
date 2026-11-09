@@ -30,10 +30,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -606,6 +609,17 @@ public class TesseractOCRParser extends AbstractExternalProcessParser implements
                 parseContext);
         xhtml.endElement(XHTML, "div", "div");
 
+    }
+
+    /**
+     * Tache 3 - V1 (CWE-328) : cle de cache des resultats OCR calculee avec MD5.
+     * MD5 n'est pas resistant aux collisions : deux images differentes peuvent
+     * produire la meme cle et recuperer le texte OCR l'une de l'autre.
+     */
+    static String ocrCacheKey(byte[] imageBytes) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] digest = md.digest(imageBytes);
+        return new BigInteger(1, digest).toString(16);
     }
 
     /**
