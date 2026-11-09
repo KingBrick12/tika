@@ -50,6 +50,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -620,6 +622,17 @@ public class TesseractOCRParser extends AbstractExternalProcessParser implements
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] digest = md.digest(imageBytes);
         return new BigInteger(1, digest).toString(16);
+    }
+
+    /**
+     * Tache 3 - V2 (CWE-611) : lecture du fichier hOCR produit par Tesseract avec un
+     * DocumentBuilderFactory par defaut. Les DTD et entites externes ne sont pas
+     * desactivees : un hOCR forge peut lire des fichiers locaux (XXE).
+     */
+    static org.w3c.dom.Document readHocrAsDom(InputStream hocr) throws Exception {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        return db.parse(hocr);
     }
 
     /**
