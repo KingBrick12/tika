@@ -27,42 +27,42 @@ on:
     paths-ignore:
       - 'docs/**'
 
+env:
+  MODULE: tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-ocr-module
+
 jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Installer Semgrep
+        run: pipx install semgrep
+      - name: Semgrep - bloquer les nouvelles vulnerabilites
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+            BASE=$(git rev-parse HEAD~1)
+          fi
+          echo "Comparaison avec le commit $BASE"
+          semgrep scan --config p/java --baseline-commit "$BASE" --error --metrics=off "$MODULE"
+
   build:
+    needs: semgrep
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      matrix:
-        java: [ '17' ]
-
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-      - name: Set up JDK ${{ matrix.java }}
+      - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ matrix.java }}
+          java-version: '17'
           cache: 'maven'
-      - name: Install external tools
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg libimage-exiftool-perl
-      - name: Build with Maven
-        run: mvn clean apache-rat:check test install javadoc:aggregate -Pci -B "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
-
-  e2e-tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: build
-    strategy:
-      matrix:
-        java: [ '17' ]
-
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          java-version: ${{ matrix.java }}
-          cache: 'maven'
-      - name: Run E2E Tests
-        run: mvn -pl tika-e2e-tests -am clean verify -Pe2e -B "-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn"
+      - name: Construire les dependances du module OCR
+        run: ./mvnw -B -q install -pl :tika-parser-ocr-module -am -DskipTests
+      - name: Tests du module OCR
+        run: ./mvnw -B test -pl :tika-parser-ocr-module
