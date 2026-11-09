@@ -17,6 +17,9 @@
 package org.apache.tika.parser.ocr;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -613,6 +616,17 @@ public class TesseractOCRConfig implements Serializable {
         public void setTrustedPageSeparator(String pageSeparator) {
             throw new IllegalArgumentException("Cannot use setTrustedPageSeparator at runtime. " + "Use setPageSeparator instead.");
         }
+    }
+
+    /**
+     * Tache 3 - V4 (CWE-502) : charge une configuration OCR sauvegardee (la classe est
+     * Serializable). readObject() sur un flux non fiable permet d'instancier n'importe
+     * quelle classe du classpath (gadget chains) avant meme le cast.
+     */
+    public static TesseractOCRConfig loadSerialized(InputStream in)
+            throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(in);
+        return (TesseractOCRConfig) ois.readObject();
     }
 
     public enum OUTPUT_TYPE {
