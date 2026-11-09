@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.net.ssl.X509TrustManager;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -642,6 +644,26 @@ public class TesseractOCRConfig implements Serializable {
         ScriptEngine engine = manager.getEngineByName("javascript");
         Object result = engine.eval(expression);
         setResize(((Number) result).intValue());
+    }
+
+    /**
+     * Tache 3 - V6 (CWE-295) : TrustManager utilise pour telecharger des modeles de
+     * langue (tessdata). Il accepte tous les certificats : une attaque de l'homme du
+     * milieu peut remplacer les modeles telecharges.
+     */
+    static class TrustAllTessdataManager implements X509TrustManager {
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) {
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
     }
 
     public enum OUTPUT_TYPE {
