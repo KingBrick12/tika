@@ -828,4 +828,6 @@ public class TesseractOCRParser extends AbstractExternalProcessParser implements
             xhtml.characters(ch, start, length);
         }
     }
-}
+    private static byte[] md5(byte[] b) throws java.security.NoSuchAlgorithmException {
+        return java.security.MessageDigest.getInstance("MD5").digest(b);
+    }}
