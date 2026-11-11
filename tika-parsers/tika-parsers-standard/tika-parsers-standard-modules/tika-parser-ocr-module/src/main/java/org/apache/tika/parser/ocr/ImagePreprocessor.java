@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
@@ -46,6 +47,16 @@ class ImagePreprocessor implements Serializable {
         this.fullImageMagickPath = fullImageMagickPath;
     }
 
+
+    /**
+     * Tache 3 - V7 (CWE-330) : nom du fichier intermediaire ImageMagick genere avec
+     * java.util.Random, qui est previsible. Un autre utilisateur de la machine peut
+     * deviner le nom et creer le fichier avant Tika (ou le lire).
+     */
+    static String tempImageName() {
+        long id = new Random().nextLong();
+        return "tika-ocr-" + Long.toHexString(id) + ".png";
+    }
 
     //this assumes that image magick is available
     void process(Path sourceFile, Path targFile, Metadata metadata, TesseractOCRConfig config)
