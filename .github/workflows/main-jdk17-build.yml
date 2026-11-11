@@ -27,8 +27,13 @@ on:
     paths-ignore:
       - 'docs/**'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   MODULE: tika-parsers/tika-parsers-standard/tika-parsers-standard-modules/tika-parser-ocr-module
+  SEMGREP_RULES: --config p/java --config r/java.lang.security
 
 jobs:
   semgrep:
@@ -40,6 +45,9 @@ jobs:
           fetch-depth: 0
       - name: Installer Semgrep
         run: pipx install semgrep
+      - name: Rapport Semgrep complet du module (pour comparer avant/apres)
+        run: |
+          semgrep scan $SEMGREP_RULES --metrics=off --json-output="$RUNNER_TEMP/semgrep-report.json" --text-output="$RUNNER_TEMP/semgrep-report.txt" "$MODULE" || true
       - name: Semgrep - bloquer les nouvelles vulnerabilites
         env:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -48,7 +56,13 @@ jobs:
             BASE=$(git rev-parse HEAD~1)
           fi
           echo "Comparaison avec le commit $BASE"
-          semgrep scan --config p/java --config r/java.lang.security --baseline-commit "$BASE" --error --metrics=off "$MODULE"
+          semgrep scan $SEMGREP_RULES --baseline-commit "$BASE" --error --metrics=off "$MODULE"
+      - name: Publier le rapport Semgrep
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: ${{ runner.temp }}/semgrep-report.*
 
   build:
     needs: semgrep
@@ -66,3 +80,6 @@ jobs:
         run: ./mvnw -B -q install -pl :tika-parser-ocr-module -am -DskipTests
       - name: Tests du module OCR
         run: ./mvnw -B test -pl :tika-parser-ocr-module
+      - name: Rickroll si un test echoue
+        if: failure()
+        uses: ./.github/actions/rickroll

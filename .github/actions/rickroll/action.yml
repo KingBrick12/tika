@@ -1,0 +1,51 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Tache 3 IFT3913 - action reutilisable qui rickrolle quand un test echoue.
+# Inspiree de TejasvOnly/random-rickroll (meme GIF), mais :
+#  - action composite (bash) au lieu de node12, qui n'est plus supporte par GitHub ;
+#  - fonctionne sur push ET pull_request (l'originale ne marche que sur l'ouverture d'une issue).
+name: 'Rickroll'
+description: 'Never gonna give you up : rickrolle le resume du run (et la PR) quand un test echoue'
+inputs:
+  github-token:
+    description: 'Jeton utilise pour commenter la pull request'
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Rickroll dans le resume du run
+      shell: bash
+      run: |
+        GIF="https://user-images.githubusercontent.com/37572049/90699500-0cc3ec00-e2a1-11ea-8d13-989526e86b0e.gif"
+        {
+          echo "## Never gonna give you up... mais un test vient d'echouer"
+          echo ""
+          echo "![rickroll]($GIF)"
+          echo ""
+          echo "[Voir le detail du test qui a echoue](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "::error title=Rickroll::Never gonna give you up, never gonna let you down... mais un test a echoue."
+    - name: Rickroll dans la pull request
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "Un test a echoue... ![rickroll](https://user-images.githubusercontent.com/37572049/90699500-0cc3ec00-e2a1-11ea-8d13-989526e86b0e.gif)"
