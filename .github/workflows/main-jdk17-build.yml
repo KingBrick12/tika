@@ -48,6 +48,8 @@ jobs:
       - name: Rapport Semgrep complet du module (pour comparer avant/apres)
         run: |
           semgrep scan $SEMGREP_RULES --metrics=off --json-output="$RUNNER_TEMP/semgrep-report.json" --text-output="$RUNNER_TEMP/semgrep-report.txt" "$MODULE" || true
+          echo "Nombre total d'alertes dans le module : $(jq '.results | length' "$RUNNER_TEMP/semgrep-report.json")"
+          cat "$RUNNER_TEMP/semgrep-report.txt"
       - name: Semgrep - bloquer les nouvelles vulnerabilites
         env:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
