@@ -48,7 +48,7 @@ jobs:
             BASE=$(git rev-parse HEAD~1)
           fi
           echo "Comparaison avec le commit $BASE"
-          semgrep scan --config p/java --baseline-commit "$BASE" --error --metrics=off "$MODULE"
+          semgrep scan --config p/java --config r/java.lang.security --baseline-commit "$BASE" --error --metrics=off "$MODULE"
 
   build:
     needs: semgrep
