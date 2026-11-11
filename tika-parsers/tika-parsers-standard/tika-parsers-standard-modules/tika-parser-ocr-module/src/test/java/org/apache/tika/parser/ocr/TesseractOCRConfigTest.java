@@ -246,4 +246,11 @@ public class TesseractOCRConfigTest extends TikaTest {
             config.setColorspace("someth!ng");
         });
     }
+
+    // Tache 3 - test volontairement en echec pour declencher le rickroll dans le CI
+    @Test
+    public void testRickroll() {
+        TesseractOCRConfig config = new TesseractOCRConfig();
+        assertEquals(42, config.getDensity(), "Never gonna give you up");
+    }
 }
